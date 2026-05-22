@@ -689,7 +689,7 @@ export const demoData = {
             "esVersion": true,
             "nombre": "Syrthas Veloniebla - Version de mascara",
             "titulo": "Identidad alternativa",
-            "imagenPrincipalUrl": "demo-assets/img/Personajes/_7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
+            "imagenPrincipalUrl": "demo-assets/img/Personajes/7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
             "ambitoVisibilidadCodigo": "campana_vista_previa",
             "creadoEn": {},
             "actualizadoEn": {},
@@ -1030,7 +1030,7 @@ export const demoData = {
             "esVersion": true,
             "nombre": "Kaela Riscoazul - Version de mascara",
             "titulo": "Identidad alternativa",
-            "imagenPrincipalUrl": "demo-assets/img/Personajes/_3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
+            "imagenPrincipalUrl": "demo-assets/img/Personajes/3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
             "ambitoVisibilidadCodigo": "campana_vista_previa",
             "creadoEn": {},
             "actualizadoEn": {},
@@ -2134,7 +2134,7 @@ export const demoData = {
           "esVersion": true,
           "nombre": "Syrthas Veloniebla - Version de mascara",
           "titulo": "Identidad alternativa",
-          "imagenPrincipalUrl": "demo-assets/img/Personajes/_7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
+          "imagenPrincipalUrl": "demo-assets/img/Personajes/7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
           "ambitoVisibilidadCodigo": "campana_vista_previa",
           "creadoEn": {},
           "actualizadoEn": {},
@@ -2164,7 +2164,7 @@ export const demoData = {
           "esVersion": true,
           "nombre": "Kaela Riscoazul - Version de mascara",
           "titulo": "Identidad alternativa",
-          "imagenPrincipalUrl": "demo-assets/img/Personajes/_3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
+          "imagenPrincipalUrl": "demo-assets/img/Personajes/3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
           "ambitoVisibilidadCodigo": "campana_vista_previa",
           "creadoEn": {},
           "actualizadoEn": {},
@@ -2616,7 +2616,7 @@ export const demoData = {
         "galeriaImagenes": [
           {
             "id": "82057150-a06f-4a01-bed6-154ec6e3f32c",
-            "imagenUrl": "demo-assets/img/Personajes/_7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
+            "imagenUrl": "demo-assets/img/Personajes/7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
             "ordenVisualizacion": 1
           }
         ],
@@ -3030,7 +3030,7 @@ export const demoData = {
         "galeriaImagenes": [
           {
             "id": "e476134c-2344-4541-abc4-b32b44525a3a",
-            "imagenUrl": "demo-assets/img/Personajes/_3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
+            "imagenUrl": "demo-assets/img/Personajes/3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
             "ordenVisualizacion": 1
           }
         ],
@@ -4552,7 +4552,7 @@ export const demoData = {
             "nombre": "Syrthas Veloniebla - Version de mascara",
             "titulo": "Identidad alternativa",
             "descripcion": "Version demo publica parcial para mostrar variantes.",
-            "imagenPrincipalUrl": "demo-assets/img/Personajes/_7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
+            "imagenPrincipalUrl": "demo-assets/img/Personajes/7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
             "ambitoVisibilidadCodigo": "campana_vista_previa",
             "creadoEn": {},
             "actualizadoEn": {},
@@ -4609,7 +4609,7 @@ export const demoData = {
             "nombre": "Kaela Riscoazul - Version de mascara",
             "titulo": "Identidad alternativa",
             "descripcion": "Version demo publica parcial para mostrar variantes.",
-            "imagenPrincipalUrl": "demo-assets/img/Personajes/_3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
+            "imagenPrincipalUrl": "demo-assets/img/Personajes/3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
             "ambitoVisibilidadCodigo": "campana_vista_previa",
             "creadoEn": {},
             "actualizadoEn": {},
@@ -5471,7 +5471,7 @@ export const demoData = {
           "galeriaImagenes": [
             {
               "id": "82057150-a06f-4a01-bed6-154ec6e3f32c",
-              "imagenUrl": "demo-assets/img/Personajes/_7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
+              "imagenUrl": "demo-assets/img/Personajes/7d94dd65-6ee9-40d6-b407-3c46e80abd73.jpg",
               "ordenVisualizacion": 1
             }
           ],
@@ -6492,7 +6492,7 @@ export const demoData = {
           "galeriaImagenes": [
             {
               "id": "e476134c-2344-4541-abc4-b32b44525a3a",
-              "imagenUrl": "demo-assets/img/Personajes/_3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
+              "imagenUrl": "demo-assets/img/Personajes/3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
               "ordenVisualizacion": 1
             }
           ],
@@ -12955,7 +12955,7 @@ export const demoData = {
             "id": "be4b82aa-e1ed-4388-839b-b69ef58e8cb1",
             "nombre": "Kaela Riscoazul - Version de mascara",
             "titulo": "Identidad alternativa",
-            "imagenPrincipalUrl": "demo-assets/img/Personajes/_3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
+            "imagenPrincipalUrl": "demo-assets/img/Personajes/3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
             "campana": {
               "id": "7ee00597-c674-44f4-b944-a3ace31ba101",
               "nombre": "Ecos de Valdaran"
@@ -19465,7 +19465,7 @@ export const demoData = {
             "id": "be4b82aa-e1ed-4388-839b-b69ef58e8cb1",
             "nombre": "Kaela Riscoazul - Version de mascara",
             "titulo": "Identidad alternativa",
-            "imagenPrincipalUrl": "demo-assets/img/Personajes/_3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
+            "imagenPrincipalUrl": "demo-assets/img/Personajes/3e42c2ea-7e67-488c-9fcd-49f1b99dd04f.jpg",
             "campana": {
               "id": "7ee00597-c674-44f4-b944-a3ace31ba101",
               "nombre": "Ecos de Valdaran"
