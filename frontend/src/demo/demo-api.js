@@ -485,6 +485,42 @@ function campaignContent(campaignId, kind, params) {
   return pageFromItems(content?.items || [], params, 30)
 }
 
+function collectVersionItems(versionGroups) {
+  return Object.entries(versionGroups || {}).flatMap(([baseId, group]) =>
+    [
+      ...(group.versiones || []),
+      ...(group.versionesDerivadas || []),
+      ...(group.versionesHermana || []),
+    ].map((item) => ({ baseId, item }))
+  )
+}
+
+function detailWithVersionFallback(section, id, baseIdKey) {
+  const directDetail = section.details?.[id]
+
+  if (directDetail) {
+    return directDetail
+  }
+
+  const version = collectVersionItems(section.versions).find(
+    ({ item }) => item?.id === id
+  )
+
+  if (!version?.item) {
+    return null
+  }
+
+  const baseId = version.item[baseIdKey] || version.baseId
+  const baseDetail = section.details?.[baseId] || {}
+
+  return {
+    ...baseDetail,
+    ...version.item,
+    puedeEditar: false,
+    puedeEliminar: false,
+  }
+}
+
 function detailOr404(value, config) {
   if (!value) {
     return notFound(config)
@@ -657,7 +693,14 @@ function handleRead(path, params, config) {
   const characterMatch = path.match(/^\/characters\/([^/]+)$/u)
   if (characterMatch)
     return {
-      item: detailOr404(demoData.characters.details[characterMatch[1]], config),
+      item: detailOr404(
+        detailWithVersionFallback(
+          demoData.characters,
+          characterMatch[1],
+          'personajeBaseId'
+        ),
+        config
+      ),
     }
 
   if (path === '/objects')
@@ -675,7 +718,14 @@ function handleRead(path, params, config) {
   const objectMatch = path.match(/^\/objects\/([^/]+)$/u)
   if (objectMatch)
     return {
-      item: detailOr404(demoData.objects.details[objectMatch[1]], config),
+      item: detailOr404(
+        detailWithVersionFallback(
+          demoData.objects,
+          objectMatch[1],
+          'objetoBaseId'
+        ),
+        config
+      ),
     }
 
   if (path === '/places')
