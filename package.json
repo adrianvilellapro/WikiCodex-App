@@ -1,0 +1,21 @@
+{
+  "name": "wikicodex",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo base de WikiCodex con frontend en React + Vite y backend en Node.js + Express.",
+  "scripts": {
+    "dev": "concurrently -k -n frontend,backend -c blue,green \"npm run dev --prefix frontend\" \"npm run dev --prefix backend\"",
+    "build": "npm run build --prefix frontend && npm run build --prefix backend",
+    "start": "npm run start --prefix backend",
+    "lint": "npm run lint --prefix frontend && npm run lint --prefix backend",
+    "lint:fix": "npm run lint:fix --prefix frontend && npm run lint:fix --prefix backend",
+    "format": "npm run format --prefix frontend && npm run format --prefix backend",
+    "format:write": "npm run format:write --prefix frontend && npm run format:write --prefix backend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

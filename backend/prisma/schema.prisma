@@ -1,0 +1,1213 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model ambitos_visibilidad_personaje {
+  codigo      String       @id
+  nombre      String       @unique
+  descripcion String?
+  personajes  personajes[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model arcos {
+  id                    String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id            String     @db.Uuid
+  aventura_id           String?    @db.Uuid
+  nombre                String
+  descripcion           String?
+  imagen_url            String?
+  fecha_inicio          DateTime?  @db.Date
+  fecha_fin             DateTime?  @db.Date
+  creado_por_usuario_id String     @db.Uuid
+  creado_en             DateTime   @default(now()) @db.Timestamptz(6)
+  actualizado_en        DateTime   @default(now()) @db.Timestamptz(6)
+  aventuras             aventuras? @relation(fields: [aventura_id, campana_id], references: [id, campana_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_arcos_aventura")
+  campanas              campanas   @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_arcos_campana")
+  usuarios              usuarios   @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_arcos_creado_por")
+  partidas              partidas[]
+
+  @@unique([id, campana_id], map: "uq_arcos_id_campana")
+  @@index([aventura_id], map: "idx_arcos_aventura_id")
+  @@index([campana_id], map: "idx_arcos_campana_id")
+}
+
+model asignaciones_categoria_objeto {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  objeto_id         String            @db.Uuid
+  categoria_id      String            @db.Uuid
+  creado_en         DateTime          @default(now()) @db.Timestamptz(6)
+  categorias_objeto categorias_objeto @relation(fields: [categoria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_asignaciones_categoria_objeto_categoria")
+  objetos           objetos           @relation(fields: [objeto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_asignaciones_categoria_objeto_objeto")
+
+  @@unique([objeto_id, categoria_id], map: "uq_asignaciones_categoria_objeto")
+}
+
+model asignaciones_categoria_personaje {
+  id                   String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id         String               @db.Uuid
+  categoria_id         String               @db.Uuid
+  creado_en            DateTime             @default(now()) @db.Timestamptz(6)
+  categorias_personaje categorias_personaje @relation(fields: [categoria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_asignaciones_categoria_personaje_categoria")
+  personajes           personajes           @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_asignaciones_categoria_personaje_personaje")
+
+  @@unique([personaje_id, categoria_id], map: "uq_asignaciones_categoria_personaje")
+}
+
+model asignaciones_categoria_poder {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  poder_id         String           @db.Uuid
+  categoria_id     String           @db.Uuid
+  creado_en        DateTime         @default(now()) @db.Timestamptz(6)
+  categorias_poder categorias_poder @relation(fields: [categoria_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_asignaciones_categoria_poder_categoria")
+  poderes          poderes          @relation(fields: [poder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_asignaciones_categoria_poder_poder")
+
+  @@unique([poder_id, categoria_id], map: "uq_asignaciones_categoria_poder")
+  @@index([categoria_id], map: "idx_asignaciones_categoria_poder_categoria_id")
+}
+
+model aventura_jugadores {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  aventura_id       String            @db.Uuid
+  campana_id        String            @db.Uuid
+  usuario_id        String            @db.Uuid
+  unido_en          DateTime          @default(now()) @db.Timestamptz(6)
+  creado_en         DateTime          @default(now()) @db.Timestamptz(6)
+  aventuras         aventuras         @relation(fields: [aventura_id, campana_id], references: [id, campana_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_aventura_jugadores_aventura")
+  campana_jugadores campana_jugadores @relation(fields: [campana_id, usuario_id], references: [campana_id, usuario_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_aventura_jugadores_campana_usuario")
+
+  @@unique([aventura_id, usuario_id], map: "uq_aventura_jugadores_aventura_usuario")
+  @@index([aventura_id], map: "idx_aventura_jugadores_aventura_id")
+}
+
+model aventuras {
+  id                    String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id            String               @db.Uuid
+  nombre                String
+  descripcion           String?
+  imagen_url            String?
+  creado_por_usuario_id String               @db.Uuid
+  creado_en             DateTime             @default(now()) @db.Timestamptz(6)
+  actualizado_en        DateTime             @default(now()) @db.Timestamptz(6)
+  arcos                 arcos[]
+  aventura_jugadores    aventura_jugadores[]
+  campanas              campanas             @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_aventuras_campana")
+  usuarios              usuarios             @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_aventuras_creado_por")
+  conceptos             conceptos[]
+  lugares               lugares[]
+  objetos               objetos[]
+  partidas              partidas[]
+  personajes            personajes[]
+  poderes               poderes[]
+  registro_entidades    registro_entidades[]
+
+  @@unique([campana_id, nombre], map: "uq_aventuras_campana_nombre")
+  @@unique([id, campana_id], map: "uq_aventuras_id_campana")
+}
+
+model campana_jugadores {
+  id                 String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id         String               @db.Uuid
+  usuario_id         String               @db.Uuid
+  unido_en           DateTime             @default(now()) @db.Timestamptz(6)
+  creado_en          DateTime             @default(now()) @db.Timestamptz(6)
+  aventura_jugadores aventura_jugadores[]
+  campanas           campanas             @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_campana_jugadores_campana")
+  usuarios           usuarios             @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_campana_jugadores_usuario")
+
+  @@unique([campana_id, usuario_id], map: "uq_campana_jugadores_campana_usuario")
+  @@index([campana_id], map: "idx_campana_jugadores_campana_id")
+  @@index([usuario_id], map: "idx_campana_jugadores_usuario_id")
+}
+
+model campanas {
+  id                                                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre                                            String
+  descripcion                                       String?
+  imagen_url                                        String?
+  privacidad_codigo                                 String                 @default("publica")
+  master_usuario_id                                 String                 @db.Uuid
+  creado_por_usuario_id                             String                 @db.Uuid
+  creado_en                                         DateTime               @default(now()) @db.Timestamptz(6)
+  actualizado_en                                    DateTime               @default(now()) @db.Timestamptz(6)
+  arcos                                             arcos[]
+  aventuras                                         aventuras[]
+  campana_jugadores                                 campana_jugadores[]
+  clase_campanas                                    clase_campanas[]
+  hechizo_campanas                                  hechizo_campanas[]
+  poder_campanas                                    poder_campanas[]
+  usuarios_campanas_creado_por_usuario_idTousuarios usuarios               @relation("campanas_creado_por_usuario_idTousuarios", fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_campanas_creado_por")
+  usuarios_campanas_master_usuario_idTousuarios     usuarios               @relation("campanas_master_usuario_idTousuarios", fields: [master_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_campanas_master")
+  categorias_objeto                                 categorias_objeto[]
+  categorias_personaje                              categorias_personaje[]
+  categorias_poder                                  categorias_poder[]
+  conceptos                                         conceptos[]
+  lugares                                           lugares[]
+  lugar_campanas                                    lugar_campanas[]
+  objeto_campanas                                   objeto_campanas[]
+  objetos                                           objetos[]
+  partidas                                          partidas[]
+  personajes                                        personajes[]
+  poderes                                           poderes[]
+  registro_entidades                                registro_entidades[]
+
+  @@unique([id, master_usuario_id], map: "uq_campanas_id_master")
+}
+
+model categorias_objeto {
+  id                               String                          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_origen_id                String?                         @db.Uuid
+  creado_por_usuario_id            String?                         @db.Uuid
+  nombre                           String                          @unique
+  descripcion                      String?
+  es_relevante_para_campana_origen Boolean                         @default(false)
+  creado_en                        DateTime                        @default(now()) @db.Timestamptz(6)
+  actualizado_en                   DateTime                        @default(now()) @db.Timestamptz(6)
+  asignaciones_categoria_objeto    asignaciones_categoria_objeto[]
+  campanas                         campanas?                       @relation(fields: [campana_origen_id], references: [id], onUpdate: NoAction, map: "fk_categorias_objeto_campana_origen")
+  usuarios                         usuarios?                       @relation(fields: [creado_por_usuario_id], references: [id], onUpdate: NoAction, map: "fk_categorias_objeto_creado_por")
+}
+
+model categorias_personaje {
+  id                               String                             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_origen_id                String?                            @db.Uuid
+  creado_por_usuario_id            String?                            @db.Uuid
+  nombre                           String                             @unique
+  descripcion                      String?
+  es_relevante_para_campana_origen Boolean                            @default(false)
+  creado_en                        DateTime                           @default(now()) @db.Timestamptz(6)
+  actualizado_en                   DateTime                           @default(now()) @db.Timestamptz(6)
+  asignaciones_categoria_personaje asignaciones_categoria_personaje[]
+  campanas                         campanas?                          @relation(fields: [campana_origen_id], references: [id], onUpdate: NoAction, map: "fk_categorias_personaje_campana_origen")
+  usuarios                         usuarios?                          @relation(fields: [creado_por_usuario_id], references: [id], onUpdate: NoAction, map: "fk_categorias_personaje_creado_por")
+}
+
+model categorias_poder {
+  id                               String                         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_origen_id                String?                        @db.Uuid
+  creado_por_usuario_id            String?                        @db.Uuid
+  nombre                           String                         @unique
+  descripcion                      String?
+  es_relevante_para_campana_origen Boolean                        @default(false)
+  creado_en                        DateTime                       @default(now()) @db.Timestamptz(6)
+  actualizado_en                   DateTime                       @default(now()) @db.Timestamptz(6)
+  asignaciones_categoria_poder     asignaciones_categoria_poder[]
+  campanas                         campanas?                      @relation(fields: [campana_origen_id], references: [id], onUpdate: NoAction, map: "fk_categorias_poder_campana_origen")
+  usuarios                         usuarios?                      @relation(fields: [creado_por_usuario_id], references: [id], onUpdate: NoAction, map: "fk_categorias_poder_creado_por")
+}
+
+model clases {
+  id                    String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creado_por_usuario_id String?            @db.Uuid
+  nombre                String
+  nombre_normalizado    String?
+  slug                  String?
+  idioma_codigo         String             @default("en")
+  fuente                String?
+  edicion               String?
+  es_catalogo           Boolean            @default(false)
+  categoria_catalogo    String?
+  descripcion           String?            @db.Text
+  resumen               String?            @db.Text
+  icono                 String?
+  dado_golpe_caras      Int?
+  salvaciones           Json               @default("[]")
+  competencias          Json               @default("{}")
+  equipo_inicial        Json               @default("[]")
+  tabla                 Json               @default("[]")
+  rasgos                Json               @default("[]")
+  datos_fuente          Json               @default("{}")
+  creado_en             DateTime           @default(now()) @db.Timestamptz(6)
+  actualizado_en        DateTime           @default(now()) @db.Timestamptz(6)
+  clase_campanas        clase_campanas[]
+  personaje_clases      personaje_clases[]
+  subclases             subclases[]
+  usuarios              usuarios?          @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_clases_creado_por")
+
+  @@unique([slug, idioma_codigo, fuente], map: "uq_clases_slug_idioma_fuente")
+  @@index([creado_por_usuario_id, creado_en, id], map: "idx_clases_creador_creado_en_id")
+  @@index([categoria_catalogo, idioma_codigo, nombre, id], map: "idx_clases_categoria_idioma_nombre_id")
+  @@index([es_catalogo, idioma_codigo, nombre, id], map: "idx_clases_catalogo_idioma_nombre_id")
+  @@index([idioma_codigo, nombre, id], map: "idx_clases_idioma_nombre_id")
+  @@index([nombre_normalizado], map: "idx_clases_nombre_normalizado")
+}
+
+model clase_campanas {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clase_id   String   @db.Uuid
+  campana_id String   @db.Uuid
+  creado_en  DateTime @default(now()) @db.Timestamptz(6)
+  campanas   campanas @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_clase_campanas_campana")
+  clases     clases   @relation(fields: [clase_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_clase_campanas_clase")
+
+  @@unique([clase_id, campana_id], map: "uq_clase_campanas")
+  @@index([campana_id], map: "idx_clase_campanas_campana_id")
+  @@index([clase_id], map: "idx_clase_campanas_clase_id")
+}
+
+model comentarios {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  registro_entidad_id String             @db.Uuid
+  usuario_id          String             @db.Uuid
+  comentario_padre_id String?            @db.Uuid
+  contenido           String
+  esta_editado        Boolean            @default(false)
+  esta_borrado        Boolean            @default(false)
+  creado_en           DateTime           @default(now()) @db.Timestamptz(6)
+  actualizado_en      DateTime           @default(now()) @db.Timestamptz(6)
+  borrado_en          DateTime?          @db.Timestamptz(6)
+  comentarios         comentarios?       @relation("comentariosTocomentarios", fields: [comentario_padre_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_comentarios_padre")
+  other_comentarios   comentarios[]      @relation("comentariosTocomentarios")
+  registro_entidades  registro_entidades @relation(fields: [registro_entidad_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_comentarios_registro_entidad")
+  usuarios            usuarios           @relation(fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_comentarios_usuario")
+
+  @@index([comentario_padre_id], map: "idx_comentarios_comentario_padre_id")
+  @@index([registro_entidad_id], map: "idx_comentarios_registro_entidad_id")
+}
+
+model conceptos {
+  id                    String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id            String     @db.Uuid
+  aventura_id           String?    @db.Uuid
+  creado_por_usuario_id String     @db.Uuid
+  nombre                String
+  descripcion           String?
+  imagen_url            String?
+  creado_en             DateTime   @default(now()) @db.Timestamptz(6)
+  actualizado_en        DateTime   @default(now()) @db.Timestamptz(6)
+  aventuras             aventuras? @relation(fields: [aventura_id, campana_id], references: [id, campana_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_conceptos_aventura")
+  campanas              campanas   @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_conceptos_campana")
+  usuarios              usuarios   @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_conceptos_creado_por")
+
+  @@index([campana_id], map: "idx_conceptos_campana_id")
+}
+
+model estados_personaje {
+  id         String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigo     String       @unique
+  nombre     String       @unique
+  personajes personajes[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model historial_cambios {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  registro_entidad_id String             @db.Uuid
+  actor_usuario_id    String?            @db.Uuid
+  tipo_accion         String
+  nombre_campo        String?
+  resumen             String?
+  valor_anterior      Json?
+  valor_nuevo         Json?
+  creado_en           DateTime           @default(now()) @db.Timestamptz(6)
+  usuarios            usuarios?          @relation(fields: [actor_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_historial_cambios_actor")
+  registro_entidades  registro_entidades @relation(fields: [registro_entidad_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_historial_cambios_registro_entidad")
+
+  @@index([registro_entidad_id], map: "idx_historial_cambios_registro_entidad_id")
+}
+
+model lugares {
+  id                           String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id                   String?                     @db.Uuid
+  aventura_id                  String?                     @db.Uuid
+  creado_por_usuario_id        String                      @db.Uuid
+  tipo_lugar_id                String?                     @db.Uuid
+  lugar_base_id                String?                     @db.Uuid
+  lugar_padre_id               String?                     @db.Uuid
+  ambito_visibilidad_codigo    String                      @default("privado")
+  nombre                       String
+  descripcion                  String?
+  imagen_url                   String?
+  creado_en                    DateTime                    @default(now()) @db.Timestamptz(6)
+  actualizado_en               DateTime                    @default(now()) @db.Timestamptz(6)
+  aventuras                    aventuras?                  @relation(fields: [aventura_id, campana_id], references: [id, campana_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_lugares_aventura")
+  campanas                     campanas?                   @relation(fields: [campana_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_lugares_campana")
+  usuarios                     usuarios                    @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lugares_creado_por")
+  tipos_lugar                  tipos_lugar?                @relation(fields: [tipo_lugar_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_lugares_tipo")
+  lugar_base                   lugares?                    @relation("lugares_versiones", fields: [lugar_base_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_lugares_base")
+  versiones_lugar              lugares[]                   @relation("lugares_versiones")
+  lugar_padre                  lugares?                    @relation("lugares_jerarquia", fields: [lugar_padre_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_lugares_padre")
+  lugares_hijos                lugares[]                   @relation("lugares_jerarquia")
+  lugar_campanas               lugar_campanas[]
+  lugar_imagenes               lugar_imagenes[]
+  permisos_lugar               permisos_lugar[]
+  perfiles_publicos_destacados perfiles_publicos_usuario[] @relation("perfiles_publicos_usuario_lugar_destacado")
+
+  @@index([campana_id], map: "idx_lugares_campana_id")
+  @@index([creado_por_usuario_id, creado_en, id], map: "idx_lugares_creador_creado_en_id")
+  @@index([ambito_visibilidad_codigo, creado_en, id], map: "idx_lugares_visibilidad_creado_en_id")
+  @@index([lugar_base_id], map: "idx_lugares_lugar_base_id")
+  @@index([lugar_padre_id], map: "idx_lugares_lugar_padre_id")
+  @@index([tipo_lugar_id], map: "idx_lugares_tipo_lugar_id")
+}
+
+model lugar_campanas {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lugar_id   String   @db.Uuid
+  campana_id String   @db.Uuid
+  creado_en  DateTime @default(now()) @db.Timestamptz(6)
+  lugares    lugares  @relation(fields: [lugar_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_lugar_campanas_lugar")
+  campanas   campanas @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_lugar_campanas_campana")
+
+  @@unique([lugar_id, campana_id], map: "uq_lugar_campanas")
+  @@index([campana_id], map: "idx_lugar_campanas_campana_id")
+  @@index([lugar_id], map: "idx_lugar_campanas_lugar_id")
+}
+
+model lugar_imagenes {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lugar_id            String   @db.Uuid
+  imagen_url          String
+  titulo              String?
+  orden_visualizacion Int      @default(0)
+  creado_en           DateTime @default(now()) @db.Timestamptz(6)
+  lugares             lugares  @relation(fields: [lugar_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_lugar_imagenes_lugar")
+
+  @@index([lugar_id], map: "idx_lugar_imagenes_lugar_id")
+}
+
+model permisos_lugar {
+  id                                                        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  lugar_id                                                  String         @db.Uuid
+  usuario_id                                                String         @db.Uuid
+  nivel_acceso_codigo                                       String
+  otorgado_por_usuario_id                                   String         @db.Uuid
+  creado_en                                                 DateTime       @default(now()) @db.Timestamptz(6)
+  actualizado_en                                            DateTime       @default(now()) @db.Timestamptz(6)
+  lugares                                                   lugares        @relation(fields: [lugar_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_permisos_lugar_lugar")
+  niveles_acceso                                            niveles_acceso @relation(fields: [nivel_acceso_codigo], references: [codigo], onDelete: NoAction, onUpdate: NoAction, map: "fk_permisos_lugar_nivel_acceso")
+  usuarios_permisos_lugar_usuario_idTousuarios              usuarios       @relation("permisos_lugar_usuario_idTousuarios", fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_permisos_lugar_usuario")
+  usuarios_permisos_lugar_otorgado_por_usuario_idTousuarios usuarios       @relation("permisos_lugar_otorgado_por_usuario_idTousuarios", fields: [otorgado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_permisos_lugar_otorgado_por")
+
+  @@unique([lugar_id, usuario_id], map: "uq_permisos_lugar")
+  @@index([lugar_id], map: "idx_permisos_lugar_lugar_id")
+  @@index([usuario_id], map: "idx_permisos_lugar_usuario_id")
+}
+
+model tipos_lugar {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre              String    @unique
+  orden_visualizacion Int       @default(0)
+  lugares             lugares[]
+}
+
+model niveles_acceso {
+  codigo             String               @id
+  nombre             String               @unique
+  descripcion        String?
+  permisos_personaje permisos_personaje[]
+  permisos_objeto    permisos_objeto[]
+  permisos_lugar     permisos_lugar[]
+  permisosPoders     permisos_poder[]
+}
+
+model objetos {
+  id                            String                          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id                    String?                         @db.Uuid
+  aventura_id                   String?                         @db.Uuid
+  creado_por_usuario_id         String                          @db.Uuid
+  tier_id                       String?                         @db.Uuid
+  tipo_objeto_id                String?                         @db.Uuid
+  objeto_base_id                String?                         @db.Uuid
+  ambito_visibilidad_codigo     String                          @default("privado")
+  tipo_magico_codigo            String                          @default("no_magico")
+  modificador_valor             Int?
+  modificador_tipo_codigo       String?
+  modificador_otro              String?
+  hechizos_slots                Json                            @default("{}")
+  nombre                        String
+  descripcion                   String?
+  imagen_url                    String?
+  creado_en                     DateTime                        @default(now()) @db.Timestamptz(6)
+  actualizado_en                DateTime                        @default(now()) @db.Timestamptz(6)
+  asignaciones_categoria_objeto asignaciones_categoria_objeto[]
+  aventuras                     aventuras?                      @relation(fields: [aventura_id, campana_id], references: [id, campana_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_objetos_aventura")
+  campanas                      campanas?                       @relation(fields: [campana_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_objetos_campana")
+  usuarios                      usuarios                        @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_objetos_creado_por")
+  tiers_objeto                  tiers_objeto?                   @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_objetos_tier")
+  tipos_objeto                  tipos_objeto?                   @relation(fields: [tipo_objeto_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_objetos_tipo")
+  objetos                       objetos?                        @relation("objetos_versiones", fields: [objeto_base_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_objetos_base")
+  versiones_objeto              objetos[]                       @relation("objetos_versiones")
+  objeto_campanas               objeto_campanas[]
+  objeto_modificadores          objeto_modificadores[]
+  objeto_rasgos                 objeto_rasgos[]
+  objeto_hechizos               objeto_hechizos[]
+  personaje_objetos             personaje_objetos[]
+  permisos_objeto               permisos_objeto[]
+  perfiles_publicos_destacados  perfiles_publicos_usuario[]     @relation("perfiles_publicos_usuario_objeto_destacado")
+
+  @@index([aventura_id], map: "idx_objetos_aventura_id")
+  @@index([campana_id], map: "idx_objetos_campana_id")
+  @@index([objeto_base_id], map: "idx_objetos_objeto_base_id")
+  @@index([ambito_visibilidad_codigo, creado_en, id], map: "idx_objetos_visibilidad_creado_en_id")
+  @@index([creado_por_usuario_id, creado_en, id], map: "idx_objetos_creador_creado_en_id")
+}
+
+model objeto_campanas {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  objeto_id  String   @db.Uuid
+  campana_id String   @db.Uuid
+  creado_en  DateTime @default(now()) @db.Timestamptz(6)
+  objetos    objetos  @relation(fields: [objeto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_objeto_campanas_objeto")
+  campanas   campanas @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_objeto_campanas_campana")
+
+  @@unique([objeto_id, campana_id], map: "uq_objeto_campanas")
+  @@index([campana_id], map: "idx_objeto_campanas_campana_id")
+  @@index([objeto_id], map: "idx_objeto_campanas_objeto_id")
+}
+
+model objeto_modificadores {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  objeto_id           String   @db.Uuid
+  valor               Int
+  tipo_codigo         String
+  otro                String?
+  orden_visualizacion Int      @default(0)
+  creado_en           DateTime @default(now()) @db.Timestamptz(6)
+  objetos             objetos  @relation(fields: [objeto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_objeto_modificadores_objeto")
+
+  @@unique([objeto_id, tipo_codigo, otro], map: "uq_objeto_modificadores_tipo")
+  @@index([objeto_id], map: "idx_objeto_modificadores_objeto_id")
+}
+
+model permisos_objeto {
+  id                                                         String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  objeto_id                                                  String         @db.Uuid
+  usuario_id                                                 String         @db.Uuid
+  nivel_acceso_codigo                                        String
+  otorgado_por_usuario_id                                    String         @db.Uuid
+  creado_en                                                  DateTime       @default(now()) @db.Timestamptz(6)
+  actualizado_en                                             DateTime       @default(now()) @db.Timestamptz(6)
+  niveles_acceso                                             niveles_acceso @relation(fields: [nivel_acceso_codigo], references: [codigo], onDelete: NoAction, onUpdate: NoAction, map: "fk_permisos_objeto_nivel_acceso")
+  objetos                                                    objetos        @relation(fields: [objeto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_permisos_objeto_objeto")
+  usuarios_permisos_objeto_usuario_idTousuarios              usuarios       @relation("permisos_objeto_usuario_idTousuarios", fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_permisos_objeto_usuario")
+  usuarios_permisos_objeto_otorgado_por_usuario_idTousuarios usuarios       @relation("permisos_objeto_otorgado_por_usuario_idTousuarios", fields: [otorgado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_permisos_objeto_otorgado_por")
+
+  @@unique([objeto_id, usuario_id], map: "uq_permisos_objeto")
+  @@index([objeto_id], map: "idx_permisos_objeto_objeto_id")
+  @@index([usuario_id], map: "idx_permisos_objeto_usuario_id")
+  @@index([usuario_id, nivel_acceso_codigo, objeto_id], map: "idx_permisos_objeto_usuario_nivel_objeto")
+}
+
+model tipos_rasgo_objeto {
+  id                  String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre              String          @unique
+  orden_visualizacion Int             @default(0)
+  objeto_rasgos       objeto_rasgos[]
+}
+
+model objeto_rasgos {
+  id                  String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  objeto_id           String             @db.Uuid
+  tipo_rasgo_id       String             @db.Uuid
+  nombre              String
+  descripcion         String
+  orden_visualizacion Int                @default(0)
+  creado_en           DateTime           @default(now()) @db.Timestamptz(6)
+  objetos             objetos            @relation(fields: [objeto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_objeto_rasgos_objeto")
+  tipos_rasgo_objeto  tipos_rasgo_objeto @relation(fields: [tipo_rasgo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_objeto_rasgos_tipo")
+
+  @@index([objeto_id], map: "idx_objeto_rasgos_objeto_id")
+  @@index([tipo_rasgo_id], map: "idx_objeto_rasgos_tipo_rasgo_id")
+}
+
+model partidas {
+  id                                                   String                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id                                           String                      @db.Uuid
+  aventura_id                                          String?                     @db.Uuid
+  arco_id                                              String?                     @db.Uuid
+  nombre                                               String
+  descripcion                                          String?
+  imagen_url                                           String?
+  jugada_en                                            DateTime                    @db.Date
+  creado_por_usuario_id                                String                      @db.Uuid
+  creado_en                                            DateTime                    @default(now()) @db.Timestamptz(6)
+  actualizado_en                                       DateTime                    @default(now()) @db.Timestamptz(6)
+  partida_imagenes                                     partida_imagenes[]
+  partida_combates                                     partida_combates[]
+  partida_personajes                                   partida_personajes[]
+  partida_temas_musicales                              partida_temas_musicales[]
+  arcos                                                arcos?                      @relation(fields: [arco_id, campana_id], references: [id, campana_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_partidas_arco")
+  aventuras                                            aventuras?                  @relation(fields: [aventura_id, campana_id], references: [id, campana_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_partidas_aventura")
+  campanas                                             campanas                    @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_partidas_campana")
+  usuarios                                             usuarios                    @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_partidas_creado_por")
+  personajes_personajes_partida_aparicion_idTopartidas personajes[]                @relation("personajes_partida_aparicion_idTopartidas")
+  personajes_personajes_partida_defuncion_idTopartidas personajes[]                @relation("personajes_partida_defuncion_idTopartidas")
+  perfiles_publicos_destacados                         perfiles_publicos_usuario[] @relation("perfiles_publicos_usuario_partida_destacada")
+
+  @@index([arco_id], map: "idx_partidas_arco_id")
+  @@index([aventura_id], map: "idx_partidas_aventura_id")
+  @@index([campana_id], map: "idx_partidas_campana_id")
+}
+
+model partida_imagenes {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partida_id          String   @db.Uuid
+  imagen_url          String
+  titulo              String?
+  orden_visualizacion Int      @default(0)
+  creado_en           DateTime @default(now()) @db.Timestamptz(6)
+  partidas            partidas @relation(fields: [partida_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_partida_imagenes_partida")
+
+  @@index([partida_id], map: "idx_partida_imagenes_partida_id")
+}
+
+model partida_temas_musicales {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partida_id          String   @db.Uuid
+  titulo              String?
+  musica_url          String
+  orden_visualizacion Int      @default(0)
+  creado_en           DateTime @default(now()) @db.Timestamptz(6)
+  partidas            partidas @relation(fields: [partida_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_partida_temas_musicales_partida")
+
+  @@index([partida_id], map: "idx_partida_temas_musicales_partida_id")
+}
+
+model partida_personajes {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partida_id          String     @db.Uuid
+  personaje_id        String     @db.Uuid
+  orden_visualizacion Int        @default(0)
+  creado_en           DateTime   @default(now()) @db.Timestamptz(6)
+  partidas            partidas   @relation(fields: [partida_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_partida_personajes_partida")
+  personajes          personajes @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_partida_personajes_personaje")
+
+  @@unique([partida_id, personaje_id], map: "uq_partida_personajes_partida_personaje")
+  @@index([personaje_id], map: "idx_partida_personajes_personaje_id")
+}
+
+model partida_combates {
+  id                    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  partida_id            String   @db.Uuid
+  creado_por_usuario_id String   @db.Uuid
+  nombre                String
+  snapshot              Json
+  estadisticas          Json     @default("{}")
+  creado_en             DateTime @default(now()) @db.Timestamptz(6)
+  actualizado_en        DateTime @default(now()) @db.Timestamptz(6)
+  partidas              partidas @relation(fields: [partida_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_partida_combates_partida")
+  usuarios              usuarios @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_partida_combates_creado_por")
+
+  @@index([partida_id, creado_en], map: "idx_partida_combates_partida_creado")
+}
+
+model permisos_personaje {
+  id                                                            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id                                                  String         @db.Uuid
+  usuario_id                                                    String         @db.Uuid
+  nivel_acceso_codigo                                           String
+  otorgado_por_usuario_id                                       String         @db.Uuid
+  creado_en                                                     DateTime       @default(now()) @db.Timestamptz(6)
+  actualizado_en                                                DateTime       @default(now()) @db.Timestamptz(6)
+  niveles_acceso                                                niveles_acceso @relation(fields: [nivel_acceso_codigo], references: [codigo], onDelete: NoAction, onUpdate: NoAction, map: "fk_permisos_personaje_nivel_acceso")
+  usuarios_permisos_personaje_otorgado_por_usuario_idTousuarios usuarios       @relation("permisos_personaje_otorgado_por_usuario_idTousuarios", fields: [otorgado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_permisos_personaje_otorgado_por")
+  personajes                                                    personajes     @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_permisos_personaje_personaje")
+  usuarios_permisos_personaje_usuario_idTousuarios              usuarios       @relation("permisos_personaje_usuario_idTousuarios", fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_permisos_personaje_usuario")
+
+  @@unique([personaje_id, usuario_id], map: "uq_permisos_personaje")
+  @@index([personaje_id], map: "idx_permisos_personaje_personaje_id")
+  @@index([usuario_id], map: "idx_permisos_personaje_usuario_id")
+  @@index([usuario_id, nivel_acceso_codigo, personaje_id], map: "idx_permisos_personaje_usuario_nivel_personaje")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model personaje_clases {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id String     @db.Uuid
+  clase_id     String     @db.Uuid
+  subclase_id  String?    @db.Uuid
+  nivel_clase  Int
+  creado_en    DateTime   @default(now()) @db.Timestamptz(6)
+  clases       clases     @relation(fields: [clase_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_personaje_clases_clase")
+  personajes   personajes @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_clases_personaje")
+  subclases    subclases? @relation(fields: [subclase_id, clase_id], references: [id, clase_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_personaje_clases_subclase_clase")
+
+  @@unique([personaje_id, clase_id, subclase_id], map: "uq_personaje_clases_fila_unica")
+}
+
+model personaje_imagenes {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id        String     @db.Uuid
+  imagen_url          String
+  orden_visualizacion Int        @default(0)
+  creado_en           DateTime   @default(now()) @db.Timestamptz(6)
+  personajes          personajes @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_imagenes_personaje")
+}
+
+model personaje_rasgos {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id        String     @db.Uuid
+  rasgo_id            String     @db.Uuid
+  orden_visualizacion Int        @default(0)
+  creado_en           DateTime   @default(now()) @db.Timestamptz(6)
+  personajes          personajes @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_rasgos_personaje")
+  rasgos              rasgos     @relation(fields: [rasgo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_rasgos_rasgo")
+
+  @@unique([personaje_id, rasgo_id], map: "uq_personaje_rasgos_unico")
+}
+
+model personaje_objetos {
+  id                      String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id            String     @db.Uuid
+  objeto_id               String     @db.Uuid
+  mostrar_rasgos_en_ficha Boolean    @default(false)
+  orden_visualizacion     Int        @default(0)
+  creado_en               DateTime   @default(now()) @db.Timestamptz(6)
+  objetos                 objetos    @relation(fields: [objeto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_objetos_objeto")
+  personajes              personajes @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_objetos_personaje")
+
+  @@unique([personaje_id, objeto_id], map: "uq_personaje_objetos")
+  @@index([objeto_id], map: "idx_personaje_objetos_objeto_id")
+  @@index([personaje_id, orden_visualizacion], map: "idx_personaje_objetos_personaje_orden")
+}
+
+model personaje_poderes {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id        String     @db.Uuid
+  poder_id            String     @db.Uuid
+  orden_visualizacion Int        @default(0)
+  creado_en           DateTime   @default(now()) @db.Timestamptz(6)
+  personajes          personajes @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_poderes_personaje")
+  poderes             poderes    @relation(fields: [poder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_poderes_poder")
+
+  @@unique([personaje_id, poder_id], map: "uq_personaje_poderes")
+  @@index([personaje_id, orden_visualizacion], map: "idx_personaje_poderes_personaje_orden")
+  @@index([poder_id], map: "idx_personaje_poderes_poder_id")
+}
+
+model personaje_temas_musicales {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id        String     @db.Uuid
+  titulo              String?
+  musica_url          String
+  orden_visualizacion Int        @default(0)
+  creado_en           DateTime   @default(now()) @db.Timestamptz(6)
+  personajes          personajes @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_temas_musicales_personaje")
+}
+
+model notificaciones {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuario_id  String    @db.Uuid
+  tipo        String
+  titulo      String
+  mensaje     String?
+  url_destino String?
+  leida       Boolean   @default(false)
+  metadata    Json?
+  creado_en   DateTime  @default(now()) @db.Timestamptz(6)
+  leida_en    DateTime? @db.Timestamptz(6)
+  usuarios    usuarios  @relation("notificaciones_usuario", fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_notificaciones_usuario")
+
+  @@index([creado_en], map: "idx_notificaciones_creado_en")
+  @@index([usuario_id, creado_en], map: "idx_notificaciones_usuario_creado_en")
+  @@index([usuario_id, leida, creado_en], map: "idx_notificaciones_usuario_leida_creado_en")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model personajes {
+  id                                                   String                             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id                                           String                             @db.Uuid
+  aventura_id                                          String?                            @db.Uuid
+  creado_por_usuario_id                                String                             @db.Uuid
+  propietario_usuario_id                               String                             @db.Uuid
+  tier_id                                              String?                            @db.Uuid
+  estado_id                                            String?                            @db.Uuid
+  ambito_visibilidad_codigo                            String                             @default("usuarios_seleccionados")
+  personaje_base_id                                    String?                            @db.Uuid
+  hechizos_slots                                       Json                               @default("{}")
+  nombre                                               String
+  titulo                                               String?
+  imagen_principal_url                                 String?
+  descripcion                                          String?
+  lore                                                 String?
+  edad                                                 BigInt?
+  altura_metros                                        Decimal?                           @db.Decimal(12, 2)
+  peso_kg                                              Decimal?                           @db.Decimal(12, 2)
+  es_criatura                                          Boolean                            @default(false)
+  puntos_golpe                                         BigInt?
+  clase_armadura                                       BigInt?
+  velocidad_pies                                       BigInt?
+  velocidad_metros                                     Decimal?                           @db.Decimal(15, 2)
+  bonificador_competencia                              Int?
+  iniciativa                                           BigInt?
+  percepcion_pasiva                                    BigInt?
+  investigacion_pasiva                                 BigInt?
+  puntos_experiencia                                   BigInt?
+  fuerza                                               Int?
+  destreza                                             Int?
+  constitucion                                         Int?
+  inteligencia                                         Int?
+  sabiduria                                            Int?
+  carisma                                              Int?
+  salvacion_fuerza                                     Int?
+  salvacion_destreza                                   Int?
+  salvacion_constitucion                               Int?
+  salvacion_inteligencia                               Int?
+  salvacion_sabiduria                                  Int?
+  salvacion_carisma                                    Int?
+  competencia_salvacion_fuerza                         Boolean                            @default(false)
+  competencia_salvacion_destreza                       Boolean                            @default(false)
+  competencia_salvacion_constitucion                   Boolean                            @default(false)
+  competencia_salvacion_inteligencia                   Boolean                            @default(false)
+  competencia_salvacion_sabiduria                      Boolean                            @default(false)
+  competencia_salvacion_carisma                        Boolean                            @default(false)
+  partida_aparicion_id                                 String?                            @db.Uuid
+  partida_defuncion_id                                 String?                            @db.Uuid
+  creado_en                                            DateTime                           @default(now()) @db.Timestamptz(6)
+  actualizado_en                                       DateTime                           @default(now()) @db.Timestamptz(6)
+  asignaciones_categoria_personaje                     asignaciones_categoria_personaje[]
+  permisos_personaje                                   permisos_personaje[]
+  perfiles_publicos_destacados                         perfiles_publicos_usuario[]
+  personaje_clases                                     personaje_clases[]
+  personaje_imagenes                                   personaje_imagenes[]
+  personaje_hechizos                                   personaje_hechizos[]
+  personaje_objetos                                    personaje_objetos[]
+  personaje_poderes                                    personaje_poderes[]
+  partida_personajes                                   partida_personajes[]
+  personaje_rasgos                                     personaje_rasgos[]
+  personaje_temas_musicales                            personaje_temas_musicales[]
+  ambitos_visibilidad_personaje                        ambitos_visibilidad_personaje      @relation(fields: [ambito_visibilidad_codigo], references: [codigo], onDelete: NoAction, onUpdate: NoAction, map: "fk_personajes_ambito_visibilidad")
+  aventuras                                            aventuras?                         @relation(fields: [aventura_id, campana_id], references: [id, campana_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_personajes_aventura")
+  campanas                                             campanas                           @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personajes_campana")
+  usuarios_personajes_creado_por_usuario_idTousuarios  usuarios                           @relation("personajes_creado_por_usuario_idTousuarios", fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_personajes_creado_por")
+  estados_personaje                                    estados_personaje?                 @relation(fields: [estado_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_personajes_estado")
+  partidas_personajes_partida_aparicion_idTopartidas   partidas?                          @relation("personajes_partida_aparicion_idTopartidas", fields: [partida_aparicion_id], references: [id], onUpdate: NoAction, map: "fk_personajes_partida_aparicion")
+  partidas_personajes_partida_defuncion_idTopartidas   partidas?                          @relation("personajes_partida_defuncion_idTopartidas", fields: [partida_defuncion_id], references: [id], onUpdate: NoAction, map: "fk_personajes_partida_defuncion")
+  personajes                                           personajes?                        @relation("personajesTopersonajes", fields: [personaje_base_id], references: [id], onUpdate: NoAction, map: "fk_personajes_personaje_base")
+  other_personajes                                     personajes[]                       @relation("personajesTopersonajes")
+  usuarios_personajes_propietario_usuario_idTousuarios usuarios                           @relation("personajes_propietario_usuario_idTousuarios", fields: [propietario_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_personajes_propietario")
+  tiers_personaje                                      tiers_personaje?                   @relation(fields: [tier_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_personajes_tier")
+
+  @@index([aventura_id], map: "idx_personajes_aventura_id")
+  @@index([campana_id], map: "idx_personajes_campana_id")
+  @@index([personaje_base_id], map: "idx_personajes_personaje_base_id")
+  @@index([creado_en, id], map: "idx_personajes_creado_en_id")
+  @@index([creado_por_usuario_id, creado_en, id], map: "idx_personajes_creador_creado_en_id")
+  @@index([propietario_usuario_id, creado_en, id], map: "idx_personajes_propietario_creado_en_id")
+  @@index([ambito_visibilidad_codigo, creado_en, id], map: "idx_personajes_visibilidad_creado_en_id")
+}
+
+model perfiles_publicos_usuario {
+  id                     String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuario_id             String      @unique @db.Uuid
+  personaje_destacado_id String?     @db.Uuid
+  objeto_destacado_id    String?     @db.Uuid
+  lugar_destacado_id     String?     @db.Uuid
+  partida_destacada_id   String?     @db.Uuid
+  hechizo_destacado_id   String?     @db.Uuid
+  poder_destacado_id     String?     @db.Uuid
+  descripcion            String?     @db.Text
+  creado_en              DateTime    @default(now()) @db.Timestamptz(6)
+  actualizado_en         DateTime    @default(now()) @db.Timestamptz(6)
+  objetos                objetos?    @relation("perfiles_publicos_usuario_objeto_destacado", fields: [objeto_destacado_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_perfiles_publicos_usuario_objeto_destacado")
+  lugares                lugares?    @relation("perfiles_publicos_usuario_lugar_destacado", fields: [lugar_destacado_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_perfiles_publicos_usuario_lugar_destacado")
+  partidas               partidas?   @relation("perfiles_publicos_usuario_partida_destacada", fields: [partida_destacada_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_perfiles_publicos_usuario_partida_destacada")
+  hechizos               hechizos?   @relation("perfiles_publicos_usuario_hechizo_destacado", fields: [hechizo_destacado_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_perfiles_publicos_usuario_hechizo_destacado")
+  personajes             personajes? @relation(fields: [personaje_destacado_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_perfiles_publicos_usuario_personaje_destacado")
+  poderes                poderes?    @relation("perfiles_publicos_usuario_poder_destacado", fields: [poder_destacado_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_perfiles_publicos_usuario_poder_destacado")
+  usuarios               usuarios    @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_perfiles_publicos_usuario_usuario")
+
+  @@index([hechizo_destacado_id], map: "idx_perfiles_publicos_usuario_hechizo_destacado_id")
+  @@index([lugar_destacado_id], map: "idx_perfiles_publicos_usuario_lugar_destacado_id")
+  @@index([objeto_destacado_id], map: "idx_perfiles_publicos_usuario_objeto_destacado_id")
+  @@index([partida_destacada_id], map: "idx_perfiles_publicos_usuario_partida_destacada_id")
+  @@index([personaje_destacado_id], map: "idx_perfiles_publicos_usuario_personaje_destacado_id")
+  @@index([poder_destacado_id], map: "idx_perfiles_publicos_usuario_poder_destacado_id")
+}
+
+model poderes {
+  id                           String                         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  campana_id                   String?                        @db.Uuid
+  aventura_id                  String?                        @db.Uuid
+  creado_por_usuario_id        String                         @db.Uuid
+  ambito_visibilidad_codigo    String                         @default("usuarios_seleccionados")
+  nombre                       String
+  nombre_normalizado           String?
+  descripcion                  String?                        @db.Text
+  imagen_url                   String?
+  creado_en                    DateTime                       @default(now()) @db.Timestamptz(6)
+  actualizado_en               DateTime                       @default(now()) @db.Timestamptz(6)
+  asignaciones_categoria_poder asignaciones_categoria_poder[]
+  aventuras                    aventuras?                     @relation(fields: [aventura_id, campana_id], references: [id, campana_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_poderes_aventura")
+  campanas                     campanas?                      @relation(fields: [campana_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_poderes_campana")
+  usuarios                     usuarios                       @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_poderes_creado_por")
+  permisos_poder               permisos_poder[]
+  perfiles_publicos_destacados perfiles_publicos_usuario[]    @relation("perfiles_publicos_usuario_poder_destacado")
+  poder_campanas               poder_campanas[]
+  personaje_poderes            personaje_poderes[]
+
+  @@index([campana_id], map: "idx_poderes_campana_id")
+  @@index([ambito_visibilidad_codigo, creado_en, id], map: "idx_poderes_visibilidad_creado_en_id")
+  @@index([creado_por_usuario_id, creado_en, id], map: "idx_poderes_creador_creado_en_id")
+  @@index([nombre_normalizado], map: "idx_poderes_nombre_normalizado")
+}
+
+model permisos_poder {
+  id                                                        String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  poder_id                                                  String         @db.Uuid
+  usuario_id                                                String         @db.Uuid
+  nivel_acceso_codigo                                       String
+  otorgado_por_usuario_id                                   String         @db.Uuid
+  creado_en                                                 DateTime       @default(now()) @db.Timestamptz(6)
+  actualizado_en                                            DateTime       @default(now()) @db.Timestamptz(6)
+  niveles_acceso                                            niveles_acceso @relation(fields: [nivel_acceso_codigo], references: [codigo], onDelete: NoAction, onUpdate: NoAction, map: "fk_permisos_poder_nivel_acceso")
+  poderes                                                   poderes        @relation(fields: [poder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_permisos_poder_poder")
+  usuarios_permisos_poder_otorgado_por_usuario_idTousuarios usuarios       @relation("permisos_poder_otorgado_por_usuario_idTousuarios", fields: [otorgado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_permisos_poder_otorgado_por")
+  usuarios_permisos_poder_usuario_idTousuarios              usuarios       @relation("permisos_poder_usuario_idTousuarios", fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_permisos_poder_usuario")
+
+  @@unique([poder_id, usuario_id], map: "uq_permisos_poder")
+  @@index([poder_id], map: "idx_permisos_poder_poder_id")
+  @@index([usuario_id], map: "idx_permisos_poder_usuario_id")
+  @@index([usuario_id, nivel_acceso_codigo, poder_id], map: "idx_permisos_poder_usuario_nivel_poder")
+}
+
+model poder_campanas {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  poder_id   String   @db.Uuid
+  campana_id String   @db.Uuid
+  creado_en  DateTime @default(now()) @db.Timestamptz(6)
+  poderes    poderes  @relation(fields: [poder_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_poder_campanas_poder")
+  campanas   campanas @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_poder_campanas_campana")
+
+  @@unique([poder_id, campana_id], map: "uq_poder_campanas")
+  @@index([campana_id], map: "idx_poder_campanas_campana_id")
+  @@index([poder_id], map: "idx_poder_campanas_poder_id")
+}
+
+model hechizos {
+  id                           String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creado_por_usuario_id        String?                      @db.Uuid
+  nombre                       String
+  nombre_normalizado           String
+  nivel                        Int                          @default(0)
+  escuela                      String?
+  alcance_pies                 BigInt?
+  componentes                  Json                         @default("{}")
+  duracion                     String?
+  duracion_personalizada       String?
+  clases                       Json                         @default("[]")
+  tipo_casteo                  String?
+  concentracion                Boolean                      @default(false)
+  tipo_ataque                  String?
+  tipos_dano                   Json                         @default("[]")
+  condiciones                  Json                         @default("[]")
+  miscelanea                   Json                         @default("[]")
+  tipo_salvacion               String?
+  prueba_habilidad             String?
+  rango                        String?
+  estilo_area                  String?
+  criaturas_afectadas          Json                         @default("[]")
+  descripcion                  String?                      @db.Text
+  descripcion_html             String?                      @db.Text
+  fuente                       String?
+  origen                       String                       @default("usuario")
+  es_publico                   Boolean                      @default(false)
+  creado_en                    DateTime                     @default(now()) @db.Timestamptz(6)
+  actualizado_en               DateTime                     @default(now()) @db.Timestamptz(6)
+  usuarios                     usuarios?                    @relation("hechizos_creador", fields: [creado_por_usuario_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_hechizos_creador")
+  hechizo_campanas             hechizo_campanas[]
+  hechizos_guardados_usuario   hechizos_guardados_usuario[]
+  personaje_hechizos           personaje_hechizos[]
+  objeto_hechizos              objeto_hechizos[]
+  perfiles_publicos_destacados perfiles_publicos_usuario[]  @relation("perfiles_publicos_usuario_hechizo_destacado")
+
+  @@unique([fuente, nombre_normalizado, nivel], map: "uq_hechizos_fuente_nombre_nivel")
+  @@index([es_publico, nivel, nombre], map: "idx_hechizos_publicos_nivel_nombre")
+  @@index([creado_por_usuario_id, creado_en], map: "idx_hechizos_creador_creado_en")
+  @@index([nombre_normalizado], map: "idx_hechizos_nombre_normalizado")
+}
+
+model hechizo_campanas {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  hechizo_id String   @db.Uuid
+  campana_id String   @db.Uuid
+  creado_en  DateTime @default(now()) @db.Timestamptz(6)
+  hechizos   hechizos @relation(fields: [hechizo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_hechizo_campanas_hechizo")
+  campanas   campanas @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_hechizo_campanas_campana")
+
+  @@unique([hechizo_id, campana_id], map: "uq_hechizo_campanas")
+  @@index([campana_id], map: "idx_hechizo_campanas_campana_id")
+  @@index([hechizo_id], map: "idx_hechizo_campanas_hechizo_id")
+}
+
+model dotes {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  creado_por_usuario_id String?   @db.Uuid
+  nombre                String
+  nombre_normalizado    String?
+  slug                  String?
+  idioma_codigo         String    @default("en")
+  fuente                String?
+  edicion               String?
+  es_catalogo           Boolean   @default(true)
+  categoria             String?
+  prerrequisitos        Json      @default("[]")
+  descripcion           String?   @db.Text
+  resumen               String?   @db.Text
+  beneficios            Json      @default("[]")
+  datos_fuente          Json      @default("{}")
+  creado_en             DateTime  @default(now()) @db.Timestamptz(6)
+  actualizado_en        DateTime  @default(now()) @db.Timestamptz(6)
+  usuarios              usuarios? @relation(fields: [creado_por_usuario_id], references: [id], onDelete: SetNull, onUpdate: NoAction, map: "fk_dotes_creado_por")
+
+  @@unique([slug, idioma_codigo, fuente], map: "uq_dotes_slug_idioma_fuente")
+  @@index([es_catalogo, idioma_codigo, nombre, id], map: "idx_dotes_catalogo_idioma_nombre_id")
+  @@index([creado_por_usuario_id, creado_en, id], map: "idx_dotes_creador_creado_en_id")
+  @@index([nombre_normalizado], map: "idx_dotes_nombre_normalizado")
+}
+
+model hechizos_guardados_usuario {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuario_id String   @db.Uuid
+  hechizo_id String   @db.Uuid
+  creado_en  DateTime @default(now()) @db.Timestamptz(6)
+  hechizos   hechizos @relation(fields: [hechizo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_hechizos_guardados_hechizo")
+  usuarios   usuarios @relation("hechizos_guardados_usuario", fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_hechizos_guardados_usuario")
+
+  @@unique([usuario_id, hechizo_id], map: "uq_hechizos_guardados_usuario")
+  @@index([usuario_id, creado_en], map: "idx_hechizos_guardados_usuario_creado_en")
+  @@index([hechizo_id], map: "idx_hechizos_guardados_hechizo_id")
+}
+
+model personaje_hechizos {
+  id                  String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  personaje_id        String     @db.Uuid
+  hechizo_id          String     @db.Uuid
+  orden_visualizacion Int        @default(0)
+  creado_en           DateTime   @default(now()) @db.Timestamptz(6)
+  hechizos            hechizos   @relation(fields: [hechizo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_hechizos_hechizo")
+  personajes          personajes @relation(fields: [personaje_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_personaje_hechizos_personaje")
+
+  @@unique([personaje_id, hechizo_id], map: "uq_personaje_hechizos")
+  @@index([personaje_id, orden_visualizacion], map: "idx_personaje_hechizos_personaje_orden")
+  @@index([hechizo_id], map: "idx_personaje_hechizos_hechizo")
+}
+
+model objeto_hechizos {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  objeto_id           String   @db.Uuid
+  hechizo_id          String   @db.Uuid
+  orden_visualizacion Int      @default(0)
+  creado_en           DateTime @default(now()) @db.Timestamptz(6)
+  hechizos            hechizos @relation(fields: [hechizo_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_objeto_hechizos_hechizo")
+  objetos             objetos  @relation(fields: [objeto_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_objeto_hechizos_objeto")
+
+  @@unique([objeto_id, hechizo_id], map: "uq_objeto_hechizos")
+  @@index([objeto_id, orden_visualizacion], map: "idx_objeto_hechizos_objeto_orden")
+  @@index([hechizo_id], map: "idx_objeto_hechizos_hechizo")
+}
+
+model rasgos {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tipo_rasgo_id      String             @db.Uuid
+  creador_usuario_id String             @db.Uuid
+  nombre             String
+  descripcion        String
+  es_reutilizable    Boolean            @default(false)
+  origen_tipo        String?
+  origen_entidad_id  String?            @db.Uuid
+  origen_entidad_nombre String?
+  origen_grupo_id    String?
+  origen_rasgo_clave String?
+  origen_rasgo_nombre String?
+  origen_datos       Json               @default("{}")
+  creado_en          DateTime           @default(now()) @db.Timestamptz(6)
+  actualizado_en     DateTime           @default(now()) @db.Timestamptz(6)
+  personaje_rasgos   personaje_rasgos[]
+  usuarios           usuarios           @relation(fields: [creador_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rasgos_creador")
+  tipos_rasgo        tipos_rasgo        @relation(fields: [tipo_rasgo_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rasgos_tipo")
+
+  @@index([creador_usuario_id, es_reutilizable, origen_tipo, origen_entidad_id], map: "idx_rasgos_reutilizables_origen")
+  @@index([creador_usuario_id, es_reutilizable, origen_grupo_id], map: "idx_rasgos_reutilizables_grupo")
+}
+
+model registro_entidades {
+  id                                                                              String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tipo_entidad_codigo                                                             String
+  entidad_pk                                                                      String              @db.Uuid
+  campana_id                                                                      String?             @db.Uuid
+  aventura_id                                                                     String?             @db.Uuid
+  creado_en                                                                       DateTime            @default(now()) @db.Timestamptz(6)
+  comentarios                                                                     comentarios[]
+  historial_cambios                                                               historial_cambios[]
+  aventuras                                                                       aventuras?          @relation(fields: [aventura_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_registro_entidades_aventura")
+  campanas                                                                        campanas?           @relation(fields: [campana_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_registro_entidades_campana")
+  tipos_entidad                                                                   tipos_entidad       @relation(fields: [tipo_entidad_codigo], references: [codigo], onDelete: NoAction, onUpdate: NoAction, map: "fk_registro_entidades_tipo_entidad")
+  relaciones_wiki_relaciones_wiki_entidad_destino_registro_idToregistro_entidades relaciones_wiki[]   @relation("relaciones_wiki_entidad_destino_registro_idToregistro_entidades")
+  relaciones_wiki_relaciones_wiki_entidad_origen_registro_idToregistro_entidades  relaciones_wiki[]   @relation("relaciones_wiki_entidad_origen_registro_idToregistro_entidades")
+
+  @@unique([tipo_entidad_codigo, entidad_pk], map: "uq_registro_entidades")
+  @@index([tipo_entidad_codigo, entidad_pk], map: "idx_registro_entidades_busqueda")
+  @@index([campana_id], map: "idx_registro_entidades_campana")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model relaciones_wiki {
+  id                                                                                 String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entidad_origen_registro_id                                                         String              @db.Uuid
+  entidad_destino_registro_id                                                        String              @db.Uuid
+  tipo_relacion_id                                                                   String              @db.Uuid
+  descripcion                                                                        String?
+  creado_por_usuario_id                                                              String              @db.Uuid
+  creado_en                                                                          DateTime            @default(now()) @db.Timestamptz(6)
+  usuarios                                                                           usuarios            @relation(fields: [creado_por_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_relaciones_wiki_creado_por")
+  registro_entidades_relaciones_wiki_entidad_destino_registro_idToregistro_entidades registro_entidades  @relation("relaciones_wiki_entidad_destino_registro_idToregistro_entidades", fields: [entidad_destino_registro_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_relaciones_wiki_entidad_destino")
+  registro_entidades_relaciones_wiki_entidad_origen_registro_idToregistro_entidades  registro_entidades  @relation("relaciones_wiki_entidad_origen_registro_idToregistro_entidades", fields: [entidad_origen_registro_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_relaciones_wiki_entidad_origen")
+  tipos_relacion_wiki                                                                tipos_relacion_wiki @relation(fields: [tipo_relacion_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_relaciones_wiki_tipo_relacion")
+
+  @@unique([entidad_origen_registro_id, entidad_destino_registro_id, tipo_relacion_id], map: "uq_relaciones_wiki")
+  @@index([entidad_destino_registro_id], map: "idx_relaciones_wiki_destino")
+  @@index([entidad_origen_registro_id], map: "idx_relaciones_wiki_origen")
+}
+
+model roles {
+  id       String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigo   String     @unique
+  nombre   String     @unique
+  usuarios usuarios[]
+}
+
+model subclases {
+  id                 String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clase_id           String             @db.Uuid
+  nombre             String
+  nombre_normalizado String?
+  slug               String?
+  fuente             String?
+  descripcion        String?            @db.Text
+  resumen            String?            @db.Text
+  rasgos             Json               @default("[]")
+  datos_fuente       Json               @default("{}")
+  creado_en          DateTime           @default(now()) @db.Timestamptz(6)
+  actualizado_en     DateTime           @default(now()) @db.Timestamptz(6)
+  personaje_clases   personaje_clases[]
+  clases             clases             @relation(fields: [clase_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_subclases_clase")
+
+  @@unique([clase_id, nombre, fuente], map: "uq_subclases_clase_nombre_fuente")
+  @@unique([id, clase_id], map: "uq_subclases_id_clase")
+  @@index([clase_id, nombre, id], map: "idx_subclases_clase_nombre_id")
+  @@index([nombre_normalizado], map: "idx_subclases_nombre_normalizado")
+}
+
+model tiers_objeto {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre              String    @unique
+  orden_visualizacion Int       @default(0)
+  objetos             objetos[]
+}
+
+model tiers_personaje {
+  id                  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre              String       @unique
+  orden_visualizacion Int          @default(0)
+  personajes          personajes[]
+}
+
+model tipos_entidad {
+  codigo             String               @id
+  nombre             String               @unique
+  registro_entidades registro_entidades[]
+}
+
+model tipos_objeto {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre      String    @unique
+  descripcion String?
+  objetos     objetos[]
+}
+
+model tipos_rasgo {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  nombre              String   @unique
+  orden_visualizacion Int      @default(0)
+  rasgos              rasgos[]
+}
+
+model tipos_relacion_wiki {
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  codigo          String            @unique
+  nombre          String            @unique
+  descripcion     String?
+  es_simetrica    Boolean           @default(false)
+  relaciones_wiki relaciones_wiki[]
+}
+
+model usuarios {
+  id                                                                      String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  rol_id                                                                  String                       @db.Uuid
+  nombre_usuario                                                          String                       @unique @db.Citext
+  hash_contrasena                                                         String
+  imagen_perfil_url                                                       String?
+  tema_modo                                                               String                       @default("light")
+  tema_color_hex                                                          String                       @default("#026b00")
+  modo_visual_fichas                                                      String                       @default("wikicodex")
+  creado_en                                                               DateTime                     @default(now()) @db.Timestamptz(6)
+  actualizado_en                                                          DateTime                     @default(now()) @db.Timestamptz(6)
+  arcos                                                                   arcos[]
+  aventuras                                                               aventuras[]
+  campana_jugadores                                                       campana_jugadores[]
+  campanas_campanas_creado_por_usuario_idTousuarios                       campanas[]                   @relation("campanas_creado_por_usuario_idTousuarios")
+  campanas_campanas_master_usuario_idTousuarios                           campanas[]                   @relation("campanas_master_usuario_idTousuarios")
+  categorias_objeto                                                       categorias_objeto[]
+  categorias_personaje                                                    categorias_personaje[]
+  categorias_poder                                                        categorias_poder[]
+  clases                                                                  clases[]
+  comentarios                                                             comentarios[]
+  conceptos                                                               conceptos[]
+  dotes                                                                   dotes[]
+  historial_cambios                                                       historial_cambios[]
+  lugares                                                                 lugares[]
+  hechizos                                                                hechizos[]                   @relation("hechizos_creador")
+  hechizos_guardados_usuario                                              hechizos_guardados_usuario[] @relation("hechizos_guardados_usuario")
+  favoritos                                                               favoritos_usuario[]          @relation("favoritos_usuario")
+  notificaciones_recibidas                                                notificaciones[]             @relation("notificaciones_usuario")
+  permisos_lugar_permisos_lugar_otorgado_por_usuario_idTousuarios         permisos_lugar[]             @relation("permisos_lugar_otorgado_por_usuario_idTousuarios")
+  permisos_lugar_permisos_lugar_usuario_idTousuarios                      permisos_lugar[]             @relation("permisos_lugar_usuario_idTousuarios")
+  objetos                                                                 objetos[]
+  partida_combates                                                        partida_combates[]
+  partidas                                                                partidas[]
+  permisos_objeto_permisos_objeto_otorgado_por_usuario_idTousuarios       permisos_objeto[]            @relation("permisos_objeto_otorgado_por_usuario_idTousuarios")
+  permisos_objeto_permisos_objeto_usuario_idTousuarios                    permisos_objeto[]            @relation("permisos_objeto_usuario_idTousuarios")
+  permisos_poder_permisos_poder_otorgado_por_usuario_idTousuarios         permisos_poder[]             @relation("permisos_poder_otorgado_por_usuario_idTousuarios")
+  permisos_poder_permisos_poder_usuario_idTousuarios                      permisos_poder[]             @relation("permisos_poder_usuario_idTousuarios")
+  permisos_personaje_permisos_personaje_otorgado_por_usuario_idTousuarios permisos_personaje[]         @relation("permisos_personaje_otorgado_por_usuario_idTousuarios")
+  permisos_personaje_permisos_personaje_usuario_idTousuarios              permisos_personaje[]         @relation("permisos_personaje_usuario_idTousuarios")
+  perfiles_publicos_usuario                                               perfiles_publicos_usuario?
+  personajes_personajes_creado_por_usuario_idTousuarios                   personajes[]                 @relation("personajes_creado_por_usuario_idTousuarios")
+  personajes_personajes_propietario_usuario_idTousuarios                  personajes[]                 @relation("personajes_propietario_usuario_idTousuarios")
+  poderes                                                                 poderes[]
+  rasgos                                                                  rasgos[]
+  relaciones_wiki                                                         relaciones_wiki[]
+  roles                                                                   roles                        @relation(fields: [rol_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuarios_rol")
+}
+
+model favoritos_usuario {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  usuario_id   String   @db.Uuid
+  tipo_entidad String
+  entidad_id   String   @db.Uuid
+  creado_en    DateTime @default(now()) @db.Timestamptz(6)
+  usuarios     usuarios @relation("favoritos_usuario", fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_favoritos_usuario")
+
+  @@unique([usuario_id, tipo_entidad, entidad_id], map: "uq_favoritos_usuario_entidad")
+  @@index([usuario_id, creado_en], map: "idx_favoritos_usuario_creado_en")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ConfiguracionRegistro {
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  es_unica            Boolean  @unique @default(true)
+  max_usuarios        Int
+  registro_habilitado Boolean  @default(true)
+  hash_clave_registro String
+  creado_en           DateTime @default(now()) @db.Timestamptz(6)
+  actualizado_en      DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("configuracion_registro")
+}

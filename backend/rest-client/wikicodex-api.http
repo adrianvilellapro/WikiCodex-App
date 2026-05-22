@@ -1,0 +1,260 @@
+@baseUrl = http://localhost:4000/api
+@contentType = application/json
+
+### Salud de la API
+GET {{baseUrl}}/health
+
+### Salud de la BD
+GET {{baseUrl}}/health/db
+
+### Login administrador de prueba
+# Sustituye la contrasena por la real que estes usando en local.
+POST {{baseUrl}}/auth/login
+Content-Type: {{contentType}}
+
+{
+  "nombreUsuario": "admin_prueba",
+  "contrasena": "CAMBIA_ESTA_CONTRASENA"
+}
+
+> {%
+client.global.set("token", response.body.token);
+client.global.set("adminUserId", response.body.usuario.id);
+%}
+
+### Ver usuario autenticado
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{token}}
+
+### Ver mi perfil desde el modulo de usuarios
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+
+### Actualizar mi perfil
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "imagenPerfilUrl": "https://example.com/avatar.png"
+}
+
+### Cambiar mi contrasena
+PATCH {{baseUrl}}/users/me/password
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "contrasenaActual": "CAMBIA_ESTA_CONTRASENA",
+  "nuevaContrasena": "NuevaContrasena123!"
+}
+
+### Ver configuracion de registro
+GET {{baseUrl}}/settings/registration
+Authorization: Bearer {{token}}
+
+### Actualizar configuracion de registro
+PATCH {{baseUrl}}/settings/registration
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "maxUsuarios": 25,
+  "registroHabilitado": true
+}
+
+### Cambiar clave de registro
+PATCH {{baseUrl}}/settings/registration/code
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "nuevaClaveRegistro": "ClaveNuevaApi_123!"
+}
+
+### Listar recursos CRUD disponibles
+GET {{baseUrl}}/crud
+Authorization: Bearer {{token}}
+
+### Listar usuarios
+GET {{baseUrl}}/crud/usuarios?limit=10&sortBy=creado_en&sortOrder=desc
+Authorization: Bearer {{token}}
+
+### Listar roles
+GET {{baseUrl}}/crud/roles
+Authorization: Bearer {{token}}
+
+### Listar usuarios
+GET {{baseUrl}}/users
+Authorization: Bearer {{token}}
+
+### Crear campana desde la API especifica
+POST {{baseUrl}}/campaigns
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Campana REST Client",
+  "descripcion": "Campana creada para probar el CRUD general."
+}
+
+> {%
+client.global.set("campanaId", response.body.item.id);
+%}
+
+### Listar campanas visibles
+GET {{baseUrl}}/campaigns
+Authorization: Bearer {{token}}
+
+### Ver detalle de una campana
+GET {{baseUrl}}/campaigns/{{campanaId}}
+Authorization: Bearer {{token}}
+
+### Crear aventura dentro de campana
+POST {{baseUrl}}/campaigns/{{campanaId}}/adventures
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Aventura REST Client",
+  "descripcion": "Aventura de prueba."
+}
+
+> {%
+client.global.set("aventuraId", response.body.item.id);
+%}
+
+### Listar aventuras de una campana
+GET {{baseUrl}}/campaigns/{{campanaId}}/adventures
+Authorization: Bearer {{token}}
+
+### Anadir jugador a campana
+POST {{baseUrl}}/campaigns/{{campanaId}}/players
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "usuarioId": "REEMPLAZA_CON_UN_UUID_DE_USUARIO_NO_ADMIN"
+}
+
+### Listar jugadores de una campana
+GET {{baseUrl}}/campaigns/{{campanaId}}/players
+Authorization: Bearer {{token}}
+
+### Crear categoria de personaje
+POST {{baseUrl}}/crud/categorias-personaje
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "nombre": "Categoria REST Client Personaje",
+  "descripcion": "Categoria de prueba creada desde REST Client.",
+  "campana_origen_id": "{{campanaId}}",
+  "es_relevante_para_campana_origen": true
+}
+
+> {%
+client.global.set("categoriaPersonajeId", response.body.item.id);
+%}
+
+### Crear personaje
+POST {{baseUrl}}/crud/personajes
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "campana_id": "{{campanaId}}",
+  "aventura_id": "{{aventuraId}}",
+  "nombre": "Personaje REST Client",
+  "descripcion": "Personaje de prueba del CRUD general."
+}
+
+> {%
+client.global.set("personajeId", response.body.item.id);
+%}
+
+### Asignar categoria al personaje
+POST {{baseUrl}}/crud/asignaciones-categoria-personaje
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "personaje_id": "{{personajeId}}",
+  "categoria_id": "{{categoriaPersonajeId}}"
+}
+
+### Crear objeto
+POST {{baseUrl}}/crud/objetos
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "campana_id": "{{campanaId}}",
+  "aventura_id": "{{aventuraId}}",
+  "nombre": "Objeto REST Client",
+  "descripcion": "Objeto de prueba."
+}
+
+> {%
+client.global.set("objetoId", response.body.item.id);
+%}
+
+### Crear rasgo
+POST {{baseUrl}}/crud/rasgos
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "tipo_rasgo_id": "REEMPLAZA_CON_UN_ID_REAL",
+  "nombre": "Rasgo REST Client",
+  "descripcion": "Rasgo de prueba.",
+  "es_reutilizable": true
+}
+
+### Crear poder
+POST {{baseUrl}}/crud/poderes
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "campana_id": "{{campanaId}}",
+  "aventura_id": "{{aventuraId}}",
+  "nombre": "Poder REST Client",
+  "descripcion": "Poder de prueba."
+}
+
+### Crear concepto
+POST {{baseUrl}}/crud/conceptos
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "campana_id": "{{campanaId}}",
+  "aventura_id": "{{aventuraId}}",
+  "nombre": "Concepto REST Client",
+  "descripcion": "Concepto de prueba."
+}
+
+### Crear lugar
+POST {{baseUrl}}/crud/lugares
+Authorization: Bearer {{token}}
+Content-Type: {{contentType}}
+
+{
+  "campana_id": "{{campanaId}}",
+  "aventura_id": "{{aventuraId}}",
+  "nombre": "Lugar REST Client",
+  "descripcion": "Lugar de prueba."
+}
+
+### Borrar personaje
+DELETE {{baseUrl}}/crud/personajes/{{personajeId}}
+Authorization: Bearer {{token}}
+
+### Borrar aventura
+DELETE {{baseUrl}}/crud/aventuras/{{aventuraId}}
+Authorization: Bearer {{token}}
+
+### Borrar campana
+DELETE {{baseUrl}}/crud/campanas/{{campanaId}}
+Authorization: Bearer {{token}}
